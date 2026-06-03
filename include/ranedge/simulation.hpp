@@ -10,7 +10,6 @@ namespace ranedge {
 
 struct SimulationOptions {
     std::uint64_t ticks = 12;
-    bool json = false;
 };
 
 class Simulation {

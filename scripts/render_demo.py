@@ -15,14 +15,25 @@ OUT = ROOT / "docs" / "assets" / "demo.gif"
 def main() -> None:
     build = ROOT / "build"
     subprocess.run(["make", "-C", str(ROOT)], check=True, stdout=subprocess.DEVNULL)
-    output = subprocess.check_output([str(build / "ranedge-sim"), "--ticks", "10"], text=True)
+    table = subprocess.check_output([str(build / "ranedge-sim"), "--ticks", "8"], text=True)
+    metrics = subprocess.check_output([str(build / "ranedge-sim"), "--ticks", "8", "--metrics"], text=True)
+    logs = subprocess.check_output([str(build / "ranedge-sim"), "--ticks", "8", "--otel-logs"], text=True)
+    warn_logs = [line for line in logs.splitlines() if '"severity_text":"WARN"' in line]
+    short_logs = [line[:92] + "..." if len(line) > 92 else line for line in warn_logs]
+    output = (
+        table
+        + "\n$ ranedge-sim --ticks 8 --metrics | grep alert\n"
+        + "\n".join(line for line in metrics.splitlines() if "ranedge_alert_total" in line)
+        + "\n\n$ ranedge-sim --ticks 8 --otel-logs | grep WARN\n"
+        + "\n".join(short_logs)
+    )
 
     try:
         from PIL import Image, ImageDraw, ImageFont
     except ImportError as exc:
         raise SystemExit("Pillow is required to render demo.gif. Install with: python3 -m pip install Pillow") from exc
 
-    width, height = 1120, 560
+    width, height = 1320, 760
     bg = (8, 12, 18)
     shell = (18, 26, 36)
     green = (88, 255, 167)
@@ -47,7 +58,7 @@ def main() -> None:
         font = ImageFont.load_default()
         title_font = font
 
-    lines = ["$ ranedge-sim --ticks 10"] + output.rstrip().splitlines()
+    lines = ["$ ranedge-sim --ticks 8"] + output.rstrip().splitlines()
     frames = []
     for visible in range(2, len(lines) + 1):
         image = Image.new("RGB", (width, height), bg)
@@ -60,8 +71,10 @@ def main() -> None:
 
         y = 92
         for idx, line in enumerate(lines[:visible]):
+            if y > height - 56:
+                break
             fill = green if idx == 0 else text
-            if "latency-regression" in line or "edge-cpu-pressure" in line:
+            if "latency-regression" in line or "air-interface-saturation" in line or "ranedge_alert_total" in line:
                 fill = blue
             draw.text((54, y), html.unescape(line), font=font, fill=fill)
             y += 30

@@ -8,7 +8,7 @@ flowchart LR
     Scheduler["Weighted scheduler<br/>slice priority + CQI"]
     Cell["Cell KPI collector<br/>throughput, PRB, p95 latency"]
     Detector["Rolling anomaly detector<br/>latency, PRB, CPU, mobility"]
-    Outputs["CLI table / JSONL<br/>Prometheus-ready labels"]
+    Outputs["CLI table / JSONL<br/>Prometheus / OTel-shaped telemetry"]
 
     UE --> Scheduler --> Cell --> Detector --> Outputs
 ```

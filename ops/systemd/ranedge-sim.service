@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/ranedge-sim --ticks 20 --json
+ExecStart=/usr/local/bin/ranedge-sim --ticks 20 --otel-logs
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=true

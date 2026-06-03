@@ -17,3 +17,8 @@ jobs:
         run: make test
       - name: Smoke JSON output
         run: ./build/ranedge-sim --ticks 4 --json
+      - name: Smoke telemetry output
+        run: |
+          ./build/ranedge-sim --ticks 8 --metrics | grep ranedge_alert_total
+          ./build/ranedge-sim --ticks 8 --otel-logs | grep '"severity_text":"WARN"'
+          ./build/ranedge-sim --ticks 8 --otel-traces | grep '"name":"ran.scheduler.tick"'

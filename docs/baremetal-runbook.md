@@ -24,10 +24,12 @@ make test
 ```bash
 ./build/ranedge-sim --ticks 20
 ./build/ranedge-sim --ticks 20 --json
+./build/ranedge-sim --ticks 20 --metrics
+./build/ranedge-sim --ticks 20 --otel-logs
 ```
 
 ## Operational notes
 
 - Pinning, NUMA placement, and RT scheduling are intentionally not hardcoded. Those should be set by the host profile or systemd unit.
-- JSONL output is easier to ship into Fluent Bit, Vector, Loki, or a small Prometheus exporter.
+- JSONL, metrics, and OTel-shaped records are easier to ship into Fluent Bit, Vector, Loki, Prometheus, or an OpenTelemetry Collector.
 - Keep radio logs, kernel counters, and simulator output separated until correlation is needed. It makes public examples safer and avoids leaking real lab identifiers.

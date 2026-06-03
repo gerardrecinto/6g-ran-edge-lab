@@ -10,5 +10,13 @@ echo "$ ranedge-sim --ticks 10"
 "${build_dir}/ranedge-sim" --ticks 10
 
 echo
+echo "$ ranedge-sim --ticks 8 --metrics | tail"
+"${build_dir}/ranedge-sim" --ticks 8 --metrics | tail
+
+echo
+echo "$ ranedge-sim --ticks 8 --otel-logs | tail -n 3"
+"${build_dir}/ranedge-sim" --ticks 8 --otel-logs | tail -n 3
+
+echo
 echo "$ ranedge-sim --ticks 4 --json"
 "${build_dir}/ranedge-sim" --ticks 4 --json

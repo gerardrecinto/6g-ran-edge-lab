@@ -1,8 +1,8 @@
 CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -Wall -Wextra -Wpedantic -Iinclude -O2
 BUILD_DIR := build
-SRC := src/anomaly_detector.cpp src/cell.cpp src/scheduler.cpp src/simulation.cpp
-TESTS := test_anomaly_detector test_scheduler test_simulation
+SRC := src/anomaly_detector.cpp src/cell.cpp src/scheduler.cpp src/simulation.cpp src/telemetry.cpp
+TESTS := test_anomaly_detector test_scheduler test_simulation test_telemetry
 
 .PHONY: all test clean demo
 

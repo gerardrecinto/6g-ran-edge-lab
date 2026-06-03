@@ -10,6 +10,7 @@ add_library(ranedge
     src/cell.cpp
     src/scheduler.cpp
     src/simulation.cpp
+    src/telemetry.cpp
 )
 
 target_include_directories(ranedge PUBLIC include)
@@ -19,11 +20,15 @@ add_executable(ranedge-sim src/main.cpp)
 target_link_libraries(ranedge-sim PRIVATE ranedge)
 
 enable_testing()
-add_executable(ranedge_tests
-    tests/test_anomaly_detector.cpp
-    tests/test_scheduler.cpp
-    tests/test_simulation.cpp
+
+foreach(test_name
+    test_anomaly_detector
+    test_scheduler
+    test_simulation
+    test_telemetry
 )
-target_link_libraries(ranedge_tests PRIVATE ranedge)
-target_compile_options(ranedge_tests PRIVATE -Wall -Wextra -Wpedantic)
-add_test(NAME ranedge_tests COMMAND ranedge_tests)
+    add_executable(${test_name} tests/${test_name}.cpp)
+    target_link_libraries(${test_name} PRIVATE ranedge)
+    target_compile_options(${test_name} PRIVATE -Wall -Wextra -Wpedantic)
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endforeach()

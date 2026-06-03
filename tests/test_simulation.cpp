@@ -4,7 +4,7 @@
 
 int main() {
     ranedge::Simulation simulation;
-    const auto snapshots = simulation.run({10, false});
+    const auto snapshots = simulation.run({10});
     assert(snapshots.size() == 10);
     assert(snapshots.front().throughputMbps > 0.0);
 

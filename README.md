@@ -13,8 +13,8 @@ It is standards-inspired, not a production 3GPP stack. No private lab logs, vend
 - C++17 simulator for UE demand, channel quality, slice policy, and scheduler allocation
 - KPI snapshots for throughput, p95 latency, PRB utilization, mobility instability, and edge CPU pressure
 - Rolling anomaly detector for latency regression, air-interface saturation, CPU pressure, and handover-like instability
-- Table and JSONL output for terminal use, log shipping, or exporter integration
-- Bare-metal runbook, systemd unit, Kubernetes Job, and Prometheus alert examples
+- Table, JSONL, Prometheus metrics, OpenTelemetry-shaped logs, and OpenTelemetry-shaped trace events
+- Bare-metal runbook, systemd unit, Kubernetes Job, Prometheus rules, and OTel collector example
 - Unit tests with CTest
 - GitHub Actions CI and a small Dockerfile for containerized smoke runs
 
@@ -25,6 +25,9 @@ make
 make test
 ./build/ranedge-sim --ticks 10
 ./build/ranedge-sim --ticks 4 --json
+./build/ranedge-sim --ticks 8 --metrics
+./build/ranedge-sim --ticks 8 --otel-logs
+./build/ranedge-sim --ticks 8 --otel-traces
 ```
 
 Container smoke run:
@@ -53,6 +56,7 @@ This lab keeps the moving parts small enough to read, but real enough to talk th
 - How slice priorities affect control traffic versus eMBB and IoT demand
 - Why deterministic C++ code is useful for low-latency platform experiments
 - How JSONL output can feed a larger observability path without coupling the simulator to a specific stack
+- Why logs, metrics, and traces need to tell the same story during a RAN edge incident
 - What a bare-metal readiness checklist should cover before Kubernetes enters the picture
 
 ## Architecture
@@ -64,19 +68,20 @@ flowchart LR
     UE["UE demand"] --> Scheduler["C++ scheduler"]
     Scheduler --> Kpis["KPI collector"]
     Kpis --> Detector["Anomaly detector"]
-    Detector --> Output["CLI / JSONL / ops rules"]
+    Detector --> Output["CLI / JSONL / Prometheus / OTel"]
 ```
 
 ## Ops artifacts
 
 - [Bare-metal runbook](docs/baremetal-runbook.md)
+- [Observability guide](docs/observability.md)
 - [Kubernetes Job](ops/kubernetes/job.yaml)
 - [Prometheus rules](ops/prometheus/rules.yml)
+- [OpenTelemetry Collector config](ops/otel/collector.yaml)
 - [systemd unit](ops/systemd/ranedge-sim.service)
 
 ## Roadmap
 
-- Add a tiny Prometheus textfile exporter mode
 - Add PCAP-inspired synthetic packet counters
 - Add a C API shim for embedding the simulator in other harnesses
 - Add Linux perf sample parsing for host-level correlation

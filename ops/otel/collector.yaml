@@ -1,0 +1,46 @@
+receivers:
+  filelog:
+    include:
+      - /var/log/ranedge/*.jsonl
+    start_at: beginning
+    operators:
+      - type: json_parser
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: ranedge-sim
+          static_configs:
+            - targets: ["localhost:9464"]
+
+processors:
+  batch: {}
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: lab
+        action: upsert
+
+exporters:
+  debug:
+    verbosity: detailed
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [resource, batch]
+      exporters: [debug]
+    metrics:
+      receivers: [prometheus]
+      processors: [resource, batch]
+      exporters: [debug, prometheusremotewrite]
+    traces:
+      receivers: [filelog]
+      processors: [resource, batch]
+      exporters: [debug, otlp]
