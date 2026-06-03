@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ranedge-sim
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: ranedge-sim
+          image: ghcr.io/gerardrecinto/6g-ran-edge-lab:latest
+          args: ["--ticks", "20", "--json"]
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "128Mi"
+            limits:
+              cpu: "1"
+              memory: "256Mi"
+  backoffLimit: 1

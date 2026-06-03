@@ -1,0 +1,17 @@
+groups:
+  - name: ran-edge-lab
+    rules:
+      - alert: RanEdgeLatencyRegression
+        expr: ranedge_p95_latency_ms > 25
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: RAN edge p95 latency is above the lab threshold
+      - alert: RanEdgeCpuPressure
+        expr: ranedge_edge_cpu_utilization > 82
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Edge CPU pressure may be affecting scheduler behavior
