@@ -17,6 +17,7 @@ It is standards-inspired, not a production 3GPP stack. No private lab logs, vend
 - Bare-metal runbook, systemd unit, Kubernetes Job, Prometheus rules, and OTel collector example
 - Unit tests with CTest
 - GitHub Actions CI and a small Dockerfile for containerized smoke runs
+- Deep glossary for RAN edge terms, acronyms, diagrams, and simulator examples
 
 ## Quick start
 
@@ -62,6 +63,7 @@ This lab keeps the moving parts small enough to read, but real enough to talk th
 ## Architecture
 
 See [docs/architecture.md](docs/architecture.md).
+For wireless and platform terminology, see [docs/key-terms.md](docs/key-terms.md).
 
 ```mermaid
 flowchart LR
