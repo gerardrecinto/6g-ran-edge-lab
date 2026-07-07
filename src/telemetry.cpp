@@ -1,7 +1,13 @@
 #include "ranedge/telemetry.hpp"
 
 #include <iomanip>
+#include <map>
 #include <sstream>
+#include <utility>
+
+#ifndef RANEDGE_VERSION
+#define RANEDGE_VERSION "0.0.0"
+#endif
 
 namespace ranedge {
 
@@ -52,9 +58,16 @@ std::string renderPrometheus(const std::vector<KpiSnapshot>& snapshots) {
             << std::fixed << std::setprecision(2) << item.prbUtilization << '\n';
         out << "ranedge_edge_cpu_utilization{cell=\"" << item.cellId << "\",tick=\"" << item.tick << "\"} "
             << std::fixed << std::setprecision(1) << item.edgeCpuUtilization << '\n';
+    }
+
+    std::map<std::pair<std::string, std::string>, std::uint64_t> alertCounts;
+    for (const auto& item : snapshots) {
         for (const auto& alert : item.alerts) {
-            out << "ranedge_alert_total{cell=\"" << item.cellId << "\",alert=\"" << alert << "\"} 1\n";
+            ++alertCounts[{item.cellId, alert}];
         }
+    }
+    for (const auto& [key, count] : alertCounts) {
+        out << "ranedge_alert_total{cell=\"" << key.first << "\",alert=\"" << key.second << "\"} " << count << '\n';
     }
     return out.str();
 }
@@ -62,7 +75,7 @@ std::string renderPrometheus(const std::vector<KpiSnapshot>& snapshots) {
 std::string renderOtelLogs(const std::vector<KpiSnapshot>& snapshots) {
     std::ostringstream out;
     for (const auto& item : snapshots) {
-        out << "{\"resource\":{\"service.name\":\"ranedge-sim\",\"service.version\":\"0.1.0\"},"
+        out << "{\"resource\":{\"service.name\":\"ranedge-sim\",\"service.version\":\"" RANEDGE_VERSION "\"},"
             << "\"scope\":\"ranedge.scheduler\","
             << "\"severity_text\":\"" << severityFor(item) << "\","
             << "\"body\":\"cell kpi snapshot\","

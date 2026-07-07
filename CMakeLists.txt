@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-project(6g_ran_edge_lab VERSION 0.1.0 LANGUAGES CXX)
+
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" RANEDGE_VERSION_FILE)
+string(STRIP "${RANEDGE_VERSION_FILE}" RANEDGE_VERSION_FILE)
+
+project(6g_ran_edge_lab VERSION ${RANEDGE_VERSION_FILE} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,6 +18,7 @@ add_library(ranedge
 )
 
 target_include_directories(ranedge PUBLIC include)
+target_compile_definitions(ranedge PRIVATE RANEDGE_VERSION="${PROJECT_VERSION}")
 target_compile_options(ranedge PRIVATE -Wall -Wextra -Wpedantic)
 
 add_executable(ranedge-sim src/main.cpp)
