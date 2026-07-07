@@ -32,7 +32,13 @@ int main(int argc, char** argv) {
         } else if (arg == "--otel-traces") {
             mode = OutputMode::OtelTraces;
         } else if (arg == "--ticks" && i + 1 < argc) {
-            options.ticks = static_cast<std::uint64_t>(std::strtoull(argv[++i], nullptr, 10));
+            char* end = nullptr;
+            const auto parsed = std::strtoull(argv[++i], &end, 10);
+            if (end == nullptr || *end != '\0' || parsed == 0) {
+                std::cerr << "--ticks expects a positive integer, got: " << argv[i] << "\n";
+                return 2;
+            }
+            options.ticks = static_cast<std::uint64_t>(parsed);
         } else if (arg == "--help") {
             std::cout << "Usage: ranedge-sim [--ticks N] [--json|--metrics|--otel-logs|--otel-traces]\n";
             return 0;
