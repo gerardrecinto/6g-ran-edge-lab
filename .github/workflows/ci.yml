@@ -22,3 +22,10 @@ jobs:
           ./build/ranedge-sim --ticks 8 --metrics | grep ranedge_alert_total
           ./build/ranedge-sim --ticks 8 --otel-logs | grep '"severity_text":"WARN"'
           ./build/ranedge-sim --ticks 8 --otel-traces | grep '"name":"ran.scheduler.tick"'
+      - name: Smoke edge CPU budget flag
+        run: ./build/ranedge-sim --ticks 4 --edge-cpu-budget 0.5 --json | grep edge-cpu-pressure
+      - name: Reject invalid CLI input instead of crashing
+        run: |
+          ! ./build/ranedge-sim --ticks -5
+          ! ./build/ranedge-sim --ticks 0
+          ! ./build/ranedge-sim --edge-cpu-budget -1

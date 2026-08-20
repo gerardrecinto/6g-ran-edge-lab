@@ -10,6 +10,7 @@ namespace ranedge {
 
 struct SimulationOptions {
     std::uint64_t ticks = 12;
+    double edgeCpuBudget = 1.0;
 };
 
 class Simulation {

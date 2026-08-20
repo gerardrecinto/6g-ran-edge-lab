@@ -34,6 +34,8 @@ std::vector<UserEquipment> Simulation::usersForTick(std::uint64_t tick) const {
 }
 
 std::vector<KpiSnapshot> Simulation::run(const SimulationOptions& options) {
+    cell_.setEdgeCpuBudget(options.edgeCpuBudget);
+
     std::vector<KpiSnapshot> snapshots;
     snapshots.reserve(options.ticks);
 

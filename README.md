@@ -29,6 +29,7 @@ make test
 ./build/ranedge-sim --ticks 8 --metrics
 ./build/ranedge-sim --ticks 8 --otel-logs
 ./build/ranedge-sim --ticks 8 --otel-traces
+./build/ranedge-sim --ticks 8 --edge-cpu-budget 0.5 --json
 ```
 
 Container smoke run:
