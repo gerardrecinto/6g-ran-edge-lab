@@ -13,6 +13,10 @@ const CellConfig& Cell::config() const {
     return config_;
 }
 
+void Cell::setEdgeCpuBudget(double budget) {
+    config_.edgeCpuBudget = budget;
+}
+
 std::vector<Allocation> Cell::schedule(const std::vector<UserEquipment>& users) const {
     return Scheduler{}.allocate(config_, users);
 }
@@ -36,6 +40,13 @@ KpiSnapshot Cell::collectKpis(std::uint64_t tick, const std::vector<Allocation>&
         return allocation.latencyMs > 28.0 && allocation.grantedMbps < 30.0;
     });
 
+    // edgeCpuBudget models relative edge host headroom: a smaller budget
+    // (weaker/more contended host) pushes modeled CPU pressure up faster for
+    // the same radio load, a larger budget absorbs it. 1.0 is the baseline
+    // and reproduces the previous fixed formula exactly.
+    const double cpuBudget = std::max(0.1, config_.edgeCpuBudget);
+    const double edgeCpuUtilization = std::min(99.0, (18.0 + prb * 62.0) / cpuBudget);
+
     return {
         tick,
         config_.id,
@@ -43,7 +54,7 @@ KpiSnapshot Cell::collectKpis(std::uint64_t tick, const std::vector<Allocation>&
         p95Latency,
         prb,
         handoverFailures,
-        std::min(99.0, 18.0 + prb * 62.0),
+        edgeCpuUtilization,
         {}
     };
 }

@@ -4,7 +4,7 @@ CXXFLAGS ?= -std=c++17 -Wall -Wextra -Wpedantic -Iinclude -O2
 CXXFLAGS += -DRANEDGE_VERSION=\"$(VERSION)\"
 BUILD_DIR := build
 SRC := src/anomaly_detector.cpp src/cell.cpp src/scheduler.cpp src/simulation.cpp src/telemetry.cpp
-TESTS := test_anomaly_detector test_scheduler test_simulation test_telemetry
+TESTS := test_anomaly_detector test_cell test_scheduler test_simulation test_telemetry
 
 .PHONY: all test clean demo
 

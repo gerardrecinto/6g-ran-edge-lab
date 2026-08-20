@@ -28,6 +28,7 @@ enable_testing()
 
 foreach(test_name
     test_anomaly_detector
+    test_cell
     test_scheduler
     test_simulation
     test_telemetry

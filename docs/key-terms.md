@@ -96,6 +96,16 @@ The cell has:
 - slice policies
 - scheduled users
 
+`edge CPU budget` scales the modeled `edgeCpuUtilization` KPI: a smaller
+budget (weaker or more contended edge host) shows CPU pressure sooner for
+the same radio load, a larger budget absorbs more of it before the
+`edge-cpu-pressure` alert fires. The default is `1.0`. Override it per run
+with `--edge-cpu-budget`:
+
+```bash
+./build/ranedge-sim --ticks 8 --edge-cpu-budget 0.5 --json
+```
+
 ### LTE
 
 `LTE` means Long-Term Evolution. It is a 4G radio technology. In this repo, LTE appears as a lower spectral-efficiency access mode for IoT-style devices.
@@ -118,7 +128,7 @@ ue-xr-01 -> 5G NR -> embb-video -> high throughput demand
 
 ### Wi-Fi 7
 
-`Wi-Fi 7` is IEEE 802.11be. It is not cellular RAN, but real edge environments often include cellular and Wi-Fi access side by side. The simulator includes Wi-Fi offload so the platform story is not artificially cellular-only.
+`Wi-Fi 7` is IEEE 802.11be. It sits outside cellular RAN. Real edge environments often run cellular and Wi-Fi access side by side, so the simulator includes Wi-Fi offload to cover both.
 
 ### 6G / IMT-2030
 
@@ -138,7 +148,7 @@ References:
 
 ## RAN architecture acronyms
 
-These terms are not fully implemented in the simulator, but they are necessary context for understanding RAN edge conversations.
+These terms are outside what the simulator implements. They are necessary context for understanding RAN edge conversations.
 
 | Acronym | Meaning | Plain explanation |
 |---|---|---|
@@ -279,7 +289,7 @@ air-interface-saturation
 
 ### MHz
 
-`MHz` means megahertz. It measures spectrum bandwidth. More bandwidth can mean more potential capacity, but real capacity also depends on radio quality, modulation, interference, antenna design, and scheduler behavior.
+`MHz` means megahertz. It measures spectrum bandwidth. More bandwidth can mean more potential capacity. Real capacity also depends on radio quality, modulation, interference, antenna design, and scheduler behavior.
 
 In the simulator:
 
@@ -360,7 +370,7 @@ This is the modeled aggregate throughput granted by the scheduler for a tick.
 
 ### MTTR
 
-`MTTR` means Mean Time To Recovery or Mean Time To Resolve, depending on the team. It is the time from detection to recovery or resolution. The repo does not calculate MTTR directly, but its alerts and telemetry are the kind of signals that reduce MTTR in a real platform.
+`MTTR` means Mean Time To Recovery or Mean Time To Resolve, depending on the team. It is the time from detection to recovery or resolution. The repo does not calculate MTTR directly. Its alerts and telemetry are the kind of signals that reduce MTTR in a real platform.
 
 ### Anomaly detector
 
@@ -412,7 +422,7 @@ The repo includes [baremetal-runbook.md](baremetal-runbook.md) to show what a pl
 
 ### Kubernetes
 
-`Kubernetes` is a container orchestration platform. It schedules containers, manages job lifecycle, and provides deployment primitives. This repo includes a Kubernetes Job as an ops artifact, but the simulator itself does not require Kubernetes.
+`Kubernetes` is a container orchestration platform. It schedules containers, manages job lifecycle, and provides deployment primitives. This repo includes a Kubernetes Job as an ops artifact. The simulator itself does not require Kubernetes to run.
 
 ### systemd
 
