@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6g-ran-edge-lab: a RAN edge you can read</title>
+<meta name="description" content="Replay a deterministic C++ RAN edge simulator, captured at deploy, and see how the edge CPU budget moves throughput, latency and alerts.">
+<meta property="og:title" content="6g-ran-edge-lab">
+<meta property="og:description" content="Replay a deterministic C++ RAN edge simulator, captured at deploy, and see how the edge CPU budget moves throughput, latency and alerts.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2306b6d4'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+
+:root{--bg:#f8fafc;--panel:#fff;--panel2:#f1f5f9;--line:#e2e8f0;--fg:#0f172a;--mute:#475569;--brand:#0e7490;--brand-bg:#cffafe;--ok:#047857;--ok-bg:#d1fae5;--err:#b91c1c;--err-bg:#fee2e2;--code:#0b1220;--code-fg:#e2e8f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#22d3ee;--brand-bg:#08333d;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}}
+:root[data-theme=dark]{--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#22d3ee;--brand-bg:#08333d;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+code,pre,textarea,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--fg);text-decoration:none}
+.logo i{width:22px;height:22px;border-radius:6px;background:#06b6d4;display:inline-block}
+nav .links{display:flex;gap:18px;align-items:center;font-size:14px}
+nav .links a{color:var(--mute);text-decoration:none}
+nav .links a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--panel);cursor:pointer;font-size:15px}
+.btn.primary{background:#06b6d4;border-color:#06b6d4;color:#032a33}
+.btn.primary:hover{background:#22d3ee}
+.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #06b6d4;outline-offset:2px}
+.hero{padding:72px 0 40px;text-align:center}
+.pill{display:inline-block;font-size:13px;color:var(--brand);background:var(--brand-bg);padding:4px 12px;border-radius:99px;margin-bottom:20px;font-weight:600}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--brand)}
+.lede{max-width:700px;margin:0 auto 28px;color:var(--mute);font-size:18px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stats{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin-top:36px;color:var(--mute);font-size:14px}
+.stats b{display:block;color:var(--fg);font-size:22px}
+section{padding:56px 0}
+h2{font-size:clamp(26px,4vw,36px);margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 28px;max-width:720px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lab{grid-template-columns:minmax(0,1fr)}nav .links .hide-s{display:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.card h3{margin:0;padding:12px 16px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:600 12px system-ui;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);cursor:pointer;text-transform:none;letter-spacing:0}
+.chip[aria-pressed=true]{background:var(--brand-bg);border-color:var(--brand);color:var(--brand)}
+#log{display:block;width:100%;height:420px;border:0;padding:12px 14px;font-size:12.5px;line-height:1.55;background:var(--code);color:var(--code-fg);resize:vertical;white-space:pre;overflow:auto}
+.src{display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);font-size:13px;color:var(--mute);flex-wrap:wrap}
+.out{min-height:420px}
+.status{padding:16px;color:var(--mute);font-size:14px}
+.verdict{padding:18px 16px;border-bottom:1px solid var(--line);background:var(--err-bg)}
+.verdict.unknown{background:var(--panel2)}
+.verdict b{display:block;font-size:20px;text-transform:uppercase;letter-spacing:.04em;color:var(--err)}
+.verdict.unknown b{color:var(--mute)}
+.verdict span{font-size:14px;color:var(--mute)}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec h4{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;max-width:260px;display:inline-block;vertical-align:middle;margin-right:10px;width:60%}
+.bar i{display:block;height:100%;background:#06b6d4}
+.site{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.site:last-child{border:0}
+.site code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
+.fix{background:var(--ok-bg);color:var(--ok);padding:10px 12px;border-radius:8px;font-size:14px}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:860px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.step .n{width:28px;height:28px;border-radius:8px;background:var(--brand-bg);color:var(--brand);display:grid;place-items:center;font-weight:700;margin-bottom:10px}
+.step h3{margin:0 0 6px;font-size:17px}
+.step p{margin:0;color:var(--mute);font-size:15px}
+.tw{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow-x:auto;max-width:100%}
+table{width:100%;min-width:560px;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);background:var(--panel2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-family:ui-monospace,monospace;font-weight:700;white-space:nowrap}
+.install pre{background:var(--code);color:var(--code-fg);padding:16px;border-radius:12px;overflow-x:auto;font-size:13.5px;margin:0 0 12px}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.limits{background:var(--panel);border:1px solid var(--line);border-left:4px solid #f59e0b;border-radius:10px;padding:16px 20px}
+.limits ul{margin:8px 0 0;padding-left:20px;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--mute);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.cv{padding:10px 14px 4px}
+svg.ch{display:block;width:100%;height:auto}
+.alr{display:flex;gap:6px;flex-wrap:wrap;padding:6px 14px 14px}
+.al{font:700 11px ui-monospace,monospace;padding:3px 9px;border-radius:6px;background:var(--err-bg);color:var(--err)}
+.al.ok{background:var(--ok-bg);color:var(--ok)}
+pre.raw{margin:0;padding:12px 16px;font-size:12px;line-height:1.5;white-space:pre;overflow:auto;max-height:340px;background:var(--code);color:var(--code-fg)}
+.sim{display:inline-block;font:700 11px ui-monospace,monospace;color:var(--brand);background:var(--brand-bg);padding:2px 8px;border-radius:6px;margin-left:8px;letter-spacing:0;text-transform:none}
+.leg{display:flex;gap:14px;font-size:12px;color:var(--mute);padding:0 14px 8px;flex-wrap:wrap}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="#top"><i></i>6g-ran-edge-lab</a>
+  <div class="links"><a href="#try" class="hide-s">Try it</a><a href="#install" class="hide-s">Install</a><a class="btn" href="https://github.com/gerardrecinto/6g-ran-edge-lab">GitHub</a></div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <h1>A scheduler decision shows up as <em>latency</em>. Can you see it?</h1>
+  <p class="lede">A C++17 lab that models slice-aware scheduling, mobility pressure and edge host load, with an anomaly detector and Prometheus and OpenTelemetry output. Replay its real output below.</p>
+  <div class="cta"><a class="btn primary" href="#try">Replay the lab</a><a class="btn" href="#install">Run it</a></div>
+  <div class="stats"><div><b>4</b>alert types</div><div><b>5</b>output formats</div><div><b>0</b>randomness, runs repeat exactly</div></div>
+</div></header>
+
+
+<section id="try"><div class="wrap">
+  <h2>Replay the lab, change the edge CPU budget</h2>
+  <p class="sub">The C++ simulator is built and run by the deploy workflow, and its real output is bundled with this page. The run is deterministic, with no randomness, so a captured run is the same as a live one. Pick a budget to see how throughput, latency and alerts move over 12 ticks.</p>
+  <div class="lab">
+    <div class="card">
+      <h3><span>KPIs per tick <span class="sim">CAPTURED AT DEPLOY</span></span><span class="tools" id="bud" role="group" aria-label="Edge CPU budget"></span></h3>
+      <div class="status" id="boot">Loading the captured runs...</div>
+      <div id="viz" hidden>
+        <div class="cv"><svg class="ch" id="c1" role="img" aria-label="Throughput and latency per tick"></svg></div>
+        <div class="leg"><span><i style="background:#06b6d4"></i>throughput Mbps</span><span><i style="background:#f59e0b"></i>p95 latency ms</span><span><i style="background:#a78bfa"></i>edge CPU %</span></div>
+        <div class="alr" id="alr"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span>Raw output</span><span class="tools" id="fm" role="group" aria-label="Output format"><button class="chip" data-f="table" aria-pressed="true">Table</button><button class="chip" data-f="jsonl" aria-pressed="false">JSONL</button><button class="chip" data-f="metrics" aria-pressed="false">Prometheus</button><button class="chip" data-f="otel" aria-pressed="false">OTel logs</button></span></h3>
+      <pre class="raw" id="raw"></pre>
+    </div>
+  </div>
+  <p class="note">Everything here is synthetic. The scenario is six simulated devices across four slices, with demand rising on ticks 5 to 8 and mobility events on ticks 7 and 8. It is standards-inspired, not a 3GPP stack.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>How it works</h2>
+  <p class="sub">Small enough to read in one sitting, real enough to reason about an incident.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><h3>Schedule by slice</h3><p>User equipment demand and channel quality feed a slice-aware scheduler. Control traffic outranks video, IoT and Wi-Fi offload.</p></div>
+    <div class="step"><div class="n">2</div><h3>Collect the KPIs</h3><p>Each tick produces throughput, p95 latency, resource block use and edge CPU pressure. A rolling detector flags regressions and instability.</p></div>
+    <div class="step"><div class="n">3</div><h3>Emit it your way</h3><p>A table, JSON lines, Prometheus metrics, and OpenTelemetry-shaped logs and traces, with ops files for systemd, Kubernetes and Prometheus rules.</p></div>
+  </div>
+</div></section>
+
+<section id="install" class="install"><div class="wrap">
+  <h2>Run it</h2>
+  <p class="sub">A C++17 compiler and make. Docker works too.</p>
+  <div class="cols2">
+    <div>
+<pre>make
+make test
+./build/ranedge-sim --ticks 10
+./build/ranedge-sim --ticks 8 --json
+./build/ranedge-sim --ticks 8 --metrics</pre>
+    </div>
+    <div>
+<pre>./build/ranedge-sim --ticks 8 --edge-cpu-budget 0.5 --json
+
+docker build -t ranedge-sim .
+docker run --rm ranedge-sim --ticks 6 --json</pre>
+      <p class="note">The README links a bare-metal runbook, an observability guide and the ops files.</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="limits"><strong>What this does not do</strong><ul>
+    <li>It is a lab model. It is not a 3GPP stack and was not measured against a real radio.</li>
+    <li>The numbers come from one fixed scenario. Changing the budget is the only knob this page exposes.</li>
+    <li>Anomaly thresholds are the repo's defaults. They are examples, not tuned alert policy.</li>
+  </ul></div>
+</div></section>
+
+
+<footer><div class="wrap">
+  <span>6g-ran-edge-lab. MIT licensed. Built by <a href="https://github.com/gerardrecinto">Gerard Recinto</a>.</span>
+  <span><a href="https://github.com/gerardrecinto/6g-ran-edge-lab">Source</a> &middot; <a href="https://github.com/gerardrecinto/6g-ran-edge-lab/releases">Releases</a></span>
+</div></footer>
+
+<script>
+
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const track = (n) => { try { if (window.plausible) window.plausible(n); } catch (e) {} };
+  let data = null, key = "1.0", fmt = "table";
+  function line(rows, f, color, W, H, P, max) {
+    const x = (i) => P + (rows.length === 1 ? 0 : (i * (W - 2 * P)) / (rows.length - 1)), y = (v) => H - P - (v / max) * (H - 2 * P);
+    return `<polyline points="${rows.map((r, i) => x(i) + "," + y(f(r))).join(" ")}" fill="none" stroke="${color}" stroke-width="2.4"/>` + rows.map((r, i) => `<circle cx="${x(i)}" cy="${y(f(r))}" r="${r.alerts.length ? 5 : 3}" fill="${r.alerts.length ? "#ef4444" : color}"/>`).join("");
+  }
+  function draw() {
+    const run = data[key], rows = run.rows, W = 460, H = 200, P = 26;
+    const mx = (f) => Math.max(1, ...rows.map(f));
+    const n = (f) => (r) => f(r) / mx(f);
+    let svg = "";
+    for (let g = 0; g <= 4; g++) svg += `<line x1="${P}" x2="${W - P}" y1="${P + (g * (H - 2 * P)) / 4}" y2="${P + (g * (H - 2 * P)) / 4}" stroke="currentColor" opacity=".12"/>`;
+    svg += line(rows, n((r) => r.throughput_mbps), "#06b6d4", W, H, P, 1) + line(rows, n((r) => r.p95_latency_ms), "#f59e0b", W, H, P, 1) + line(rows, n((r) => r.edge_cpu_utilization), "#a78bfa", W, H, P, 1);
+    svg += rows.map((r, i) => `<text x="${P + (rows.length === 1 ? 0 : (i * (W - 2 * P)) / (rows.length - 1))}" y="${H - 6}" font-size="10" text-anchor="middle" fill="currentColor" opacity=".6">${r.tick}</text>`).join("");
+    svg += `<text x="${P}" y="14" font-size="10" fill="currentColor" opacity=".6">each line is scaled to its own maximum, red dots mark ticks with alerts</text>`;
+    $("c1").setAttribute("viewBox", `0 0 ${W} ${H}`); $("c1").innerHTML = svg;
+    const al = rows.filter((r) => r.alerts.length);
+    $("alr").innerHTML = al.length ? al.map((r) => `<span class="al">tick ${r.tick}: ${esc(r.alerts.join(", "))}</span>`).join("") : '<span class="al ok">no alerts in 12 ticks</span>';
+    const raw = { table: run.table, jsonl: rows.map((r) => JSON.stringify(r)).join("\n"), metrics: run.metrics, otel: run.otel }[fmt];
+    $("raw").textContent = raw;
+  }
+  fetch("data.json").then((r) => { if (!r.ok) throw new Error("no data"); return r.json(); }).then((d) => {
+    data = d;
+    $("bud").innerHTML = Object.keys(d).map((k) => `<button class="chip" data-k="${esc(k)}" aria-pressed="${k === key}">budget ${esc(k)}${k === "1.0" ? " (default)" : ""}</button>`).join("");
+    $("boot").hidden = true; $("viz").hidden = false; draw(); window.__RAN_READY__ = true;
+  }).catch(() => { $("boot").textContent = "The captured runs did not load. Run the simulator locally with the commands below."; });
+  $("bud").addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (!b) return; key = b.dataset.k; document.querySelectorAll("#bud .chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); draw(); track("ran_budget"); });
+  $("fm").addEventListener("click", (e) => { const b = e.target.closest("[data-f]"); if (!b || !data) return; fmt = b.dataset.f; document.querySelectorAll("#fm .chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); draw(); track("ran_format"); });
+})();
+
+</script>
+</body>
+</html>

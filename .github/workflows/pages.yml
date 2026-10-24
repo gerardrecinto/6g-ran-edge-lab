@@ -1,0 +1,48 @@
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "src/**", "include/**", "Makefile", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Assemble site
+        run: |
+          make CXX=g++
+          mkdir -p _site
+          cp site/index.html _site/
+          python3 - <<'PY'
+          import json, subprocess
+          def run(a): return subprocess.check_output(["./build/ranedge-sim"] + a, text=True)
+          out = {}
+          for b in ["0.25", "0.5", "0.75", "1.0", "1.5", "2.0"]:
+              f = ["--edge-cpu-budget", b]
+              rows = [json.loads(l) for l in run(["--ticks", "12", "--json"] + f).splitlines() if l.strip().startswith("{")]
+              out[b] = {"rows": rows, "table": run(["--ticks", "12"] + f), "metrics": run(["--ticks", "12", "--metrics"] + f), "otel": run(["--ticks", "12", "--otel-logs"] + f)}
+          json.dump(out, open("_site/data.json", "w"))
+          print({k: len(v["rows"]) for k, v in out.items()})
+          PY
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v5
